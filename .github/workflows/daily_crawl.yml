@@ -1,0 +1,43 @@
+name: Daily Benchmark Crawl
+
+on:
+  # JST 09:00 (UTC 00:00) に毎日実行
+  schedule:
+    - cron: "0 0 * * *"
+  # 手動トリガー（デバッグ用）
+  workflow_dispatch:
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Crawl SWE-bench
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python src/crawl_swebench.py
+
+      - name: Crawl BigCodeBench
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python src/crawl_bigcodebench.py
+
+      - name: Crawl EvalPlus
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python src/crawl_evalplus.py
